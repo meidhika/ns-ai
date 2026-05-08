@@ -1,0 +1,11 @@
+{
+  "Chat": {
+    "title": "Selamat datang di AI Chat",
+    "placeholder": "Ketik pesan Anda di sini...",
+    "loginToSave": "Masuk untuk menyimpan riwayat chat"
+  },
+  "Metadata": {
+    "title": "Asisten Chat AI",
+    "description": "Chatbot AI interaktif dengan dukungan banyak model."
+  }
+}

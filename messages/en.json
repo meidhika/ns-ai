@@ -1,0 +1,11 @@
+{
+  "Chat": {
+    "title": "Welcome to AI Chat",
+    "placeholder": "Type your message here...",
+    "loginToSave": "Login to save your chat history"
+  },
+  "Metadata": {
+    "title": "AI Chat Assistant",
+    "description": "An interactive and multi-model AI chatbot."
+  }
+}
