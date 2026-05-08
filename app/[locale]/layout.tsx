@@ -5,6 +5,12 @@ import { routing } from "@/i18n/routing";
 import SessionProvider from "@/components/providers/SessionProvider";
 import { Metadata } from "next";
 import "@/app/globals.css";
+import { Plus_Jakarta_Sans } from "next/font/google";
+
+const jakarta = Plus_Jakarta_Sans({
+  subsets: ["latin"],
+  variable: "--font-plus-jakarta",
+});
 
 export async function generateMetadata({
   params,
@@ -40,7 +46,7 @@ export default async function LocaleLayout({
   const messages = await getMessages();
 
   return (
-    <html lang={locale}>
+    <html lang={locale} className={jakarta.variable}>
       <body>
         <NextIntlClientProvider messages={messages}>
           <SessionProvider>{children}</SessionProvider>
