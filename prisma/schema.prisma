@@ -13,13 +13,6 @@ datasource db {
 }
 
 
-// prisma/schema.prisma
-
-
-// ==========================================
-// 1. SKEMA NEXT-AUTH (USER MANAGEMENT)
-// ==========================================
-
 model Account {
   id                String  @id @default(cuid())
   userId            String
@@ -57,7 +50,7 @@ model User {
   accounts      Account[]
   sessions      Session[]
   chats         Chat[]
-  documents     Document[] // Persiapan untuk fitur RAG
+  documents     Document[] 
 }
 
 model VerificationToken {
@@ -68,15 +61,11 @@ model VerificationToken {
   @@unique([identifier, token])
 }
 
-// ==========================================
-// 2. SKEMA CHATBOT & MULTI-MODEL
-// ==========================================
 
 model Chat {
   id        String   @id @default(cuid())
   title     String   @default("New Chat")
   userId    String
-  // Menyimpan preferensi model untuk chat session ini (misal: "gpt-4o", "gemini-1.5-pro", "qwen")
   model     String   @default("gemini-1.5-pro") 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -84,10 +73,9 @@ model Chat {
   user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   messages  Message[]
 
-  @@index([userId]) // Indexing untuk mempercepat query berdasarkan user
+  @@index([userId]) 
 }
 
-// Enum untuk menentukan siapa yang mengirim pesan
 enum Role {
   user
   assistant
@@ -101,8 +89,6 @@ model Message {
   role      Role
   content   String   @db.Text
   
-  // FIELD SUPER PENTING: Untuk fleksibilitas fitur masa depan
-  // Bisa menyimpan URL gambar (Image Gen), Referensi Dokumen (RAG), atau metadata spesifik model
   metadata  Json?    
   
   createdAt DateTime @default(now())
@@ -112,18 +98,14 @@ model Message {
   @@index([chatId])
 }
 
-// ==========================================
-// 3. SKEMA DOKUMEN (PERSIAPAN RAG & FILE READING)
-// ==========================================
 
 model Document {
   id          String   @id @default(cuid())
   userId      String
   title       String
-  fileUrl     String   // URL tempat file disimpan (misal: AWS S3, Vercel Blob, dll)
-  fileType    String   // 'pdf', 'csv', 'txt'
+  fileUrl     String   
+  fileType    String   
   
-  // Status pemrosesan file (misal: 'pending', 'embedded', 'failed')
   embedStatus String   @default("pending") 
   
   createdAt   DateTime @default(now())
