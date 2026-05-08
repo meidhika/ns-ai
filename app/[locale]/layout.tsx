@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { routing } from "@/i18n/routing";
 import SessionProvider from "@/components/providers/SessionProvider";
 import { Metadata } from "next";
+import "@/app/globals.css";
 
 export async function generateMetadata({
   params,
