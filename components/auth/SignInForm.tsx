@@ -1,10 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { signIn } from "next-auth/react";
 import { useTranslations } from "next-intl";
-import { Link } from "@/i18n/routing";
+import { Link, useRouter } from "@/i18n/routing";
+import { useSearchParams } from "next/navigation";
 import Image from "next/image";
+import { Eye, EyeOff } from "lucide-react";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -20,20 +23,53 @@ import {
 
 export default function SignInForm() {
   const t = useTranslations("Auth");
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  useEffect(() => {
+    if (searchParams.get("verified") === "true") {
+      toast.success("Akun berhasil diaktifkan! Silakan masuk.");
+      router.replace("/signin");
+    }
+  }, [searchParams, router]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Login dengan:", email, password);
+    setIsLoading(true);
+
+    try {
+      const res = await signIn("credentials", {
+        email,
+        password,
+        redirect: false,
+      });
+
+      if (res?.error) {
+        toast.error(res.error);
+      } else if (res?.ok) {
+        toast.success("Login berhasil! Mengalihkan...");
+        router.push("/");
+        router.refresh();
+      }
+    } catch (error) {
+      toast.error("Terjadi kesalahan sistem.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const loginWithGoogle = () => {
+    setIsLoading(true);
     signIn("google", { callbackUrl: "/" });
   };
 
   return (
-    <Card className="w-full sm:w-xl shadow-2xl shadow-primary/5 border-border/60 bg-background/80 backdrop-blur-xl">
+    <Card className="w-full sm:w-lg shadow-2xl shadow-primary/5 border-border/60 bg-background/80 backdrop-blur-xl">
       <CardHeader className="space-y-3 text-center pb-6 pt-8">
         <div className="flex justify-center mb-2">
           <Image
@@ -63,6 +99,7 @@ export default function SignInForm() {
               type="email"
               placeholder="m@example.com"
               required
+              disabled={isLoading}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="rounded-xl h-12 bg-muted/50 border-border focus-visible:ring-primary"
@@ -83,20 +120,32 @@ export default function SignInForm() {
                 {t("forgotPassword")}
               </Link>
             </div>
-            <Input
-              id="password"
-              type="password"
-              required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="rounded-xl h-12 bg-muted/50 border-border focus-visible:ring-primary"
-            />
+            <div className="relative">
+              <Input
+                id="password"
+                type={showPassword ? "text" : "password"}
+                required
+                disabled={isLoading}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="rounded-xl h-12 bg-muted/50 border-border focus-visible:ring-primary pr-10"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                disabled={isLoading}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors focus:outline-none"
+              >
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
+            </div>
           </div>
           <Button
             type="submit"
+            disabled={isLoading}
             className="w-full rounded-xl h-12 text-base font-semibold mt-2 transition-transform active:scale-[0.98]"
           >
-            {t("signInButton")}
+            {isLoading ? "Memproses..." : t("signInButton")}
           </Button>
         </form>
 
@@ -115,9 +164,9 @@ export default function SignInForm() {
           variant="outline"
           type="button"
           onClick={loginWithGoogle}
+          disabled={isLoading}
           className="w-full rounded-xl h-12 font-semibold hover:bg-muted/50 border-border transition-colors flex items-center justify-center gap-3"
         >
-          {/* Ikon Google SVG Resmi */}
           <svg
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 24 24"

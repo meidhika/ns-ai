@@ -29,15 +29,12 @@ export default function SignUpForm() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
-  // State UX & Validasi
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
 
-  // State untuk Fitur Aktivasi Email
   const [isSuccess, setIsSuccess] = useState(false);
   const [countdown, setCountdown] = useState(0);
 
-  // 1. Efek untuk menghitung mundur (1 menit 30 detik = 90 detik)
   useEffect(() => {
     let timer: NodeJS.Timeout;
     if (countdown > 0) {
@@ -46,27 +43,23 @@ export default function SignUpForm() {
     return () => clearTimeout(timer);
   }, [countdown]);
 
-  // 2. Format waktu menjadi MM:SS
   const formatTime = (seconds: number) => {
     const m = Math.floor(seconds / 60);
     const s = seconds % 60;
     return `${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
   };
 
-  // 3. Efek Polling: Cek apakah user sudah klik link di email
   useEffect(() => {
     let interval: NodeJS.Timeout;
     if (isSuccess) {
-      // Cek setiap 3 detik
       interval = setInterval(async () => {
         try {
-          // Anda harus membuat endpoint ini nanti (Langkah 3)
           const res = await fetch(`/api/auth/check-status?email=${email}`);
           if (res.ok) {
             const data = await res.json();
             if (data.isVerified) {
               clearInterval(interval);
-              router.push("/signin?verified=true"); // Pindah otomatis!
+              router.push("/signin?verified=true"); 
             }
           }
         } catch (e) {
@@ -95,7 +88,6 @@ export default function SignUpForm() {
         throw new Error(data.message || "Terjadi kesalahan");
       }
 
-      // Berhasil Register! Ganti UI dan mulai timer 90 detik
       setIsSuccess(true);
       setCountdown(90);
     } catch (err: unknown) {
@@ -109,13 +101,11 @@ export default function SignUpForm() {
   const handleResendEmail = async () => {
     setIsLoading(true);
     try {
-      // Panggil API untuk resend (Anda buat nanti)
       await fetch("/api/auth/resend-verification", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email }),
       });
-      // Reset timer kembali ke 90 detik
       setCountdown(90);
     } catch (error) {
       console.error("Gagal resend email", error);
@@ -124,10 +114,9 @@ export default function SignUpForm() {
     }
   };
 
-  // === UI JIKA BERHASIL REGISTER (Menunggu Aktivasi) ===
   if (isSuccess) {
     return (
-      <Card className="w-full sm:w-[450px] shadow-2xl shadow-primary/5 border-border/60 bg-background/80 backdrop-blur-xl text-center py-8">
+      <Card className="w-full sm:w-lg shadow-2xl shadow-primary/5 border-border/60 bg-background/80 backdrop-blur-xl text-center py-8">
         <CardContent className="space-y-6 flex flex-col items-center">
           <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mb-2 animate-pulse">
             <MailCheck size={40} className="text-primary" />

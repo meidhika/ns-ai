@@ -7,6 +7,7 @@ import { Metadata } from "next";
 import "@/app/globals.css";
 import { Plus_Jakarta_Sans } from "next/font/google";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
+import { Toaster } from "@/components/ui/sonner";
 
 const jakarta = Plus_Jakarta_Sans({
   subsets: ["latin"],
@@ -52,6 +53,7 @@ export default async function LocaleLayout({
         <NextIntlClientProvider messages={messages}>
           <ThemeProvider>
             <SessionProvider>{children}</SessionProvider>
+            <Toaster position="top-center" richColors />
           </ThemeProvider>
         </NextIntlClientProvider>
       </body>
