@@ -110,8 +110,8 @@ export default function Navbar({ toggleSidebar, isSidebarOpen }: NavbarProps) {
             <DropdownMenuTrigger asChild>
               <Button
                 variant="ghost"
-                size="icon" // 1. Tambahkan ini agar proporsinya menjadi kotak/lingkaran
-                className="relative h-9 w-9 rounded-full ml-2 overflow-hidden border border-border p-0" // 2. Tambahkan p-0 di sini
+                size="icon" 
+                className="relative h-9 w-9 rounded-full ml-2 overflow-hidden border border-border p-0" 
               >
                 <Avatar className="h-full w-full">
                   <AvatarImage
@@ -148,8 +148,7 @@ export default function Navbar({ toggleSidebar, isSidebarOpen }: NavbarProps) {
           </DropdownMenu>
         ) : (
           <Link href="/signin">
-            <Button className="ml-2 gap-2 rounded-full px-4 font-semibold hover:shadow-lg hover:shadow-primary/20 transition-all">
-              <UserCircle size={18} />
+            <Button className="rounded-full px-3 font-semibold hover:shadow-lg hover:shadow-primary/20 transition-all">
               Sign In
             </Button>
           </Link>
