@@ -83,7 +83,7 @@ export default function ChatMessage({
               >
                 {isStaging && (
                   <button
-                    onClick={() => onCancelAttachment?.(idx)} 
+                    onClick={() => onCancelAttachment?.(idx)} // Gunakan IDX
                     className="absolute -top-3 -right-3 z-10 bg-destructive text-destructive-foreground p-1 rounded-full shadow-md hover:scale-110 transition-transform"
                   >
                     <X size={14} />

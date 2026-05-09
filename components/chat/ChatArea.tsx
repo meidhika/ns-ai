@@ -8,13 +8,17 @@ import ChatMessage, {
   MessageProps,
   AttachmentType,
 } from "./ChatMessage";
+import { useChatStore } from "@/store/useChatStore";
 
 export default function ChatArea() {
   const t = useTranslations("Chat");
+  const { selectedModel } = useChatStore();
   const [chats, setChats] = useState<MessageProps[]>([]);
   const [stagingAttachments, setStagingAttachments] = useState<Attachment[]>(
     [],
   );
+
+  
 
   const handleSendMessage = (text: string) => {
     if (!text.trim() && stagingAttachments.length === 0) return;
@@ -26,7 +30,7 @@ export default function ChatArea() {
     };
 
     setChats((prev) => [...prev, newMessage]);
-    setStagingAttachments([]); 
+    setStagingAttachments([]);
   };
 
   const handleAddAttachment = (type: AttachmentType) => {

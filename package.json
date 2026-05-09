@@ -12,6 +12,7 @@
     "@ai-sdk/anthropic": "^3.0.76",
     "@ai-sdk/google": "^3.0.70",
     "@ai-sdk/openai": "^3.0.63",
+    "@ai-sdk/react": "^3.0.179",
     "@next-auth/prisma-adapter": "^1.0.7",
     "@prisma/adapter-pg": "^7.8.0",
     "@prisma/client": "^7.8.0",
