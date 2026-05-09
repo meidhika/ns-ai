@@ -6,6 +6,7 @@ import SessionProvider from "@/components/providers/SessionProvider";
 import { Metadata } from "next";
 import "@/app/globals.css";
 import { Plus_Jakarta_Sans } from "next/font/google";
+import { ThemeProvider } from "@/components/providers/ThemeProvider";
 
 const jakarta = Plus_Jakarta_Sans({
   subsets: ["latin"],
@@ -46,10 +47,12 @@ export default async function LocaleLayout({
   const messages = await getMessages();
 
   return (
-    <html lang={locale} className={jakarta.variable}>
+    <html lang={locale} className={jakarta.variable} suppressHydrationWarning>
       <body>
         <NextIntlClientProvider messages={messages}>
-          <SessionProvider>{children}</SessionProvider>
+          <ThemeProvider>
+            <SessionProvider>{children}</SessionProvider>
+          </ThemeProvider>
         </NextIntlClientProvider>
       </body>
     </html>
