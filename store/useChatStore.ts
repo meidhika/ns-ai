@@ -7,6 +7,6 @@ interface ChatStore {
 }
 
 export const useChatStore = create<ChatStore>((set) => ({
-  selectedModel: AI_PROVIDERS[1].models[1],
+  selectedModel: AI_PROVIDERS[1].models[0],
   setSelectedModel: (model) => set({ selectedModel: model }),
 }));

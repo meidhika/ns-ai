@@ -10,7 +10,11 @@ import FilePreviewList, { UploadedFile } from "./FilePreviewList";
 import ChatInputMenu from "./ChatInputMenu";
 
 interface ChatInputProps {
-  onSendMessage: (text: string) => void;
+  onSendMessage: (
+    text: string,
+    files: File[],
+    isCreateImageMode: boolean,
+  ) => void;
   onAddAttachment: (type: AttachmentType) => void;
   stagingAttachments: Attachment[];
 }
@@ -78,8 +82,8 @@ export default function ChatInput({
       !isCreateImageMode
     )
       return;
-
-    onSendMessage(inputValue);
+    const rawFiles = uploadedFiles.map((uf) => uf.file);
+    onSendMessage(inputValue, rawFiles, isCreateImageMode);
 
     setInputValue("");
     setUploadedFiles([]);

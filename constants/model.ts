@@ -11,7 +11,7 @@ export interface AIProvider {
 export const AI_PROVIDERS: readonly AIProvider[] = [
   {
     provider: "Auto",
-    models: [{ id: "gemini-2.5-flash", name: "Gemini 2.5 Flash" }],
+    models: [{ id: "gemini-2.5-flash", name: "Auto" }],
   },
   {
     provider: "Gemini",

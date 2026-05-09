@@ -17,20 +17,104 @@ export default function ChatArea() {
   const [stagingAttachments, setStagingAttachments] = useState<Attachment[]>(
     [],
   );
+  const [isTyping, setIsTyping] = useState<boolean>(false);
+  const handleSendMessage = async (
+    text: string,
+    uploadedFiles: File[],
+    isCreateImageMode: boolean,
+  ) => {
+    if (isCreateImageMode) {
+      alert(`Fitur Create Image sedang dibangun! Prompt Anda: ${text}`);
+      return;
+    }
 
-  
+    let finalPrompt = text;
+    for (const att of stagingAttachments) {
+      if (att.type === "code") {
+        finalPrompt += `\n\n[File: ${att.metadata?.filename || "code"}]\n\`\`\`\n${att.content}\n\`\`\``;
+      }
+    }
 
-  const handleSendMessage = (text: string) => {
-    if (!text.trim() && stagingAttachments.length === 0) return;
-
-    const newMessage: MessageProps = {
+    const userMessage: MessageProps = {
       role: "user",
-      content: text,
-      attachments: stagingAttachments.length > 0 ? [...stagingAttachments] : [],
+      content: finalPrompt,
+      attachments: [...stagingAttachments],
     };
 
-    setChats((prev) => [...prev, newMessage]);
+    const aiMessagePlaceholder: MessageProps = {
+      role: "assistant",
+      content: "",
+    };
+
+    setChats((prev) => [...prev, userMessage, aiMessagePlaceholder]);
     setStagingAttachments([]);
+    setIsTyping(true);
+
+    try {
+      const currentMessages = chats.map((c) => ({
+        role: c.role,
+        content: c.content,
+      }));
+      currentMessages.push({ role: "user", content: finalPrompt });
+
+      const res = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          modelId: selectedModel.id,
+          messages: currentMessages,
+        }),
+      });
+
+      if (!res.body) throw new Error("Tidak ada stream response dari server.");
+
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let done = false;
+
+      let aiTextBuffer = "";
+      let displayedText = "";
+
+      const drainInterval = setInterval(() => {
+        if (displayedText.length < aiTextBuffer.length) {
+          const charsToAdd = aiTextBuffer.slice(
+            displayedText.length,
+            displayedText.length + 3,
+          );
+          displayedText += charsToAdd;
+
+          setChats((prev) => {
+            const newChats = [...prev];
+            const lastIndex = newChats.length - 1;
+            newChats[lastIndex] = {
+              ...newChats[lastIndex],
+              content: displayedText,
+            };
+            return newChats;
+          });
+        }
+      }, 15);
+      while (!done) {
+        const { value, done: readerDone } = await reader.read();
+        done = readerDone;
+
+        if (value) {
+          const chunk = decoder.decode(value, { stream: true });
+          aiTextBuffer += chunk;
+        }
+      }
+
+      const finishInterval = setInterval(() => {
+        if (displayedText.length >= aiTextBuffer.length) {
+          clearInterval(drainInterval);
+          clearInterval(finishInterval);
+          setIsTyping(false);
+        }
+      }, 50);
+    } catch (error: unknown) {
+      console.error("Gagal mengirim pesan:", error);
+      setIsTyping(false);
+    }
   };
 
   const handleAddAttachment = (type: AttachmentType) => {
@@ -81,7 +165,7 @@ export default function ChatArea() {
               <div className="relative animate-in fade-in slide-in-from-bottom-4">
                 <ChatMessage
                   role="user"
-                  content=""
+                  content="Draft Lampiran..."
                   attachments={stagingAttachments}
                   isStaging={true}
                   onAttachmentUpdate={handleUpdateAttachment}
