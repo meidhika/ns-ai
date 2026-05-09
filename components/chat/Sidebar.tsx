@@ -81,7 +81,7 @@ export default function Sidebar({
           </button>
         ) : (
           <button
-            onClick={isMobile ? undefined : toggleSidebar} 
+            onClick={isMobile ? undefined : toggleSidebar}
             className="flex items-center justify-center w-12 h-12 rounded-xl hover:bg-primary/10 hover:text-primary transition-colors border border-border bg-background shadow-sm"
           >
             <Plus size={22} />
@@ -100,7 +100,7 @@ export default function Sidebar({
                 size={16}
                 className="text-muted-foreground shrink-0"
               />
-              <span className="text-sm truncate">Apa itu React JS?</span>
+              <span className="text-sm truncate">Apa itu Gemini?</span>
             </button>
           </>
         ) : (

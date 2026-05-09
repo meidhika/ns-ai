@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { useTranslations } from "next-intl";
+import { useEffect, useState } from "react";
+import { useLocale, useTranslations } from "next-intl";
 import ChatInput from "./ChatInput";
 import ChatMessage, {
   Attachment,
@@ -9,15 +9,53 @@ import ChatMessage, {
   AttachmentType,
 } from "./ChatMessage";
 import { useChatStore } from "@/store/useChatStore";
+import { useParams, useRouter } from "next/navigation";
 
 export default function ChatArea() {
   const t = useTranslations("Chat");
-  const { selectedModel } = useChatStore();
-  const [chats, setChats] = useState<MessageProps[]>([]);
+  const locale = useLocale();
+  const {
+    selectedModel,
+    guestId,
+    chatId,
+    setChatId,
+    chats,
+    setChats,
+    addMessage,
+    updateLastMessage,
+  } = useChatStore();
   const [stagingAttachments, setStagingAttachments] = useState<Attachment[]>(
     [],
   );
+  const router = useRouter();
   const [isTyping, setIsTyping] = useState<boolean>(false);
+  const params = useParams();
+
+  const routeChatId = params.id as string;
+
+  useEffect(() => {
+    const loadChat = async () => {
+      if (!routeChatId) return;
+
+      const res = await fetch(
+        `/api/chat/${routeChatId}?guestId=${guestId || ""}`,
+      );
+
+      if (!res.ok) {
+        console.error("Failed load chat");
+        return;
+      }
+
+      const data = await res.json();
+
+      setChats(data.messages);
+
+      setChatId(routeChatId);
+    };
+
+    loadChat();
+  }, [routeChatId, guestId, setChats, setChatId]);
+
   const handleSendMessage = async (
     text: string,
     uploadedFiles: File[],
@@ -46,7 +84,9 @@ export default function ChatArea() {
       content: "",
     };
 
-    setChats((prev) => [...prev, userMessage, aiMessagePlaceholder]);
+    addMessage(userMessage);
+
+    addMessage(aiMessagePlaceholder);
     setStagingAttachments([]);
     setIsTyping(true);
 
@@ -61,10 +101,19 @@ export default function ChatArea() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          modelId: selectedModel.id,
           messages: currentMessages,
+          modelId: selectedModel.id,
+          chatId,
+          guestId,
         }),
       });
+
+      const newChatId = res.headers.get("X-Chat-ID");
+
+      if (newChatId) {
+        setChatId(newChatId);
+        router.replace(`/${locale}/chat/${newChatId}`);
+      }
 
       if (!res.body) throw new Error("Tidak ada stream response dari server.");
 
@@ -83,15 +132,7 @@ export default function ChatArea() {
           );
           displayedText += charsToAdd;
 
-          setChats((prev) => {
-            const newChats = [...prev];
-            const lastIndex = newChats.length - 1;
-            newChats[lastIndex] = {
-              ...newChats[lastIndex],
-              content: displayedText,
-            };
-            return newChats;
-          });
+          updateLastMessage(displayedText);
         }
       }, 15);
       while (!done) {

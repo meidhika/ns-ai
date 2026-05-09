@@ -1,8 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
   provider = "prisma-client"
   output   = "../lib/generated/prisma"
@@ -11,7 +6,6 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
-
 
 model Account {
   id                String  @id @default(cuid())
@@ -66,15 +60,18 @@ model VerificationToken {
 model Chat {
   id        String   @id @default(cuid())
   title     String   @default("New Chat")
-  userId    String
-  model     String   @default("gemini-1.5-pro") 
+  userId    String?  
+  guestId   String?  
+  expiresAt DateTime? 
+  model     String   @default("gemini-2.5-flash")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user      User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
   messages  Message[]
 
-  @@index([userId]) 
+  @@index([userId])
+  @@index([guestId]) 
 }
 
 enum Role {

@@ -1,70 +1,174 @@
-// app/api/chat/route.ts
+import { authOptions } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
 import { GoogleGenAI } from "@google/genai";
+import { getServerSession } from "next-auth";
 
-export const runtime = "edge";
-
-// ==========================================
-// 1. DEFINISI TIPE DATA (100% TYPE-SAFE)
-// ==========================================
 interface IncomingMessage {
   role: string;
   content: string;
 }
 
 interface ChatRequestBody {
-  messages?: IncomingMessage[];
+  messages: IncomingMessage[];
   modelId?: string;
+  chatId?: string;
+  guestId?: string;
 }
 
 export async function POST(req: Request) {
   try {
-    // 2. INISIALISASI DI DALAM TRY-CATCH
-    // Mencegah crash fatal jika API Key tidak ditemukan
+    const session = await getServerSession(authOptions);
+    console.log("SESSION:", session);
+    console.log("USER ID:", session?.user?.id);
+    const loggedInUserId = session?.user?.id;
+
     const ai = new GoogleGenAI({
-      apiKey:
-        process.env.GOOGLE_GENERATIVE_AI_API_KEY ||
-        process.env.GEMINI_API_KEY ||
-        "",
+      apiKey: process.env.GOOGLE_GENERATIVE_AI_API_KEY || "",
     });
 
     const body = (await req.json()) as ChatRequestBody;
-    const messages = body.messages || [];
-    const modelId = body.modelId;
 
-    const safeModelId = modelId || "gemini-2.5-flash";
+    const { messages, modelId = "gemini-2.5-flash", chatId, guestId } = body;
 
-    // 3. MAPPING KETAT UNTUK GEMINI
-    // Gemini hanya mengenali role "user" dan "model"
-    const formattedContents = messages.map((m: IncomingMessage) => ({
+    if (!messages || messages.length === 0) {
+      return Response.json({ error: "Messages are required" }, { status: 400 });
+    }
+
+    /**
+     * =========================================================
+     * MIGRATE GUEST CHAT -> USER CHAT
+     * =========================================================
+     */
+    if (loggedInUserId && guestId) {
+      await prisma.chat.updateMany({
+        where: {
+          guestId,
+          userId: null,
+          expiresAt: {
+            gt: new Date(),
+          },
+        },
+        data: {
+          userId: loggedInUserId,
+          guestId: null,
+          expiresAt: null,
+        },
+      });
+    }
+
+    /**
+     * =========================================================
+     * FIND EXISTING CHAT
+     * =========================================================
+     */
+    let chat = null;
+
+    if (chatId) {
+      chat = await prisma.chat.findFirst({
+        where: loggedInUserId
+          ? {
+              id: chatId,
+              userId: loggedInUserId,
+            }
+          : {
+              id: chatId,
+              guestId,
+              expiresAt: {
+                gt: new Date(),
+              },
+            },
+      });
+    }
+
+    /**
+     * =========================================================
+     * CREATE NEW CHAT
+     * =========================================================
+     */
+    if (!chat) {
+      chat = await prisma.chat.create({
+        data: {
+          title: messages[0]?.content?.slice(0, 50) || "New Chat",
+
+          model: modelId,
+
+          userId: loggedInUserId || null,
+
+          guestId: !loggedInUserId ? guestId : null,
+
+          expiresAt: !loggedInUserId
+            ? new Date(Date.now() + 24 * 60 * 60 * 1000)
+            : null,
+        },
+      });
+    }
+
+    /**
+     * =========================================================
+     * SAVE USER MESSAGE
+     * =========================================================
+     */
+    const lastUserMessage = messages[messages.length - 1];
+
+    await prisma.message.create({
+      data: {
+        chatId: chat.id,
+        role: "user",
+        content: lastUserMessage.content,
+      },
+    });
+
+    /**
+     * =========================================================
+     * FORMAT FOR GEMINI
+     * =========================================================
+     */
+    const formattedContents = messages.map((m) => ({
       role: m.role === "assistant" ? "model" : "user",
       parts: [{ text: m.content }],
     }));
 
+    /**
+     * =========================================================
+     * STREAM RESPONSE
+     * =========================================================
+     */
     const encoder = new TextEncoder();
 
-    // 4. PEMBUATAN STREAM MURNI
     const stream = new ReadableStream({
       async start(controller) {
+        let aiFullResponse = "";
+
         try {
           const responseStream = await ai.models.generateContentStream({
-            model: safeModelId,
+            model: modelId,
             contents: formattedContents,
-            // config: {
-            //   systemInstruction:
-            //     "Kamu adalah NS AI, asisten virtual yang cerdas. Jawab menggunakan format Markdown.",
-            // },
           });
 
           for await (const chunk of responseStream) {
-            // chunk.text adalah getter di SDK Unified terbaru
             if (chunk.text) {
+              aiFullResponse += chunk.text;
+
               controller.enqueue(encoder.encode(chunk.text));
             }
           }
+
           controller.close();
-        } catch (e: unknown) {
-          console.error("Gemini Stream Error:", e);
-          controller.error(e);
+
+          /**
+           * SAVE AI MESSAGE
+           */
+          await prisma.message.create({
+            data: {
+              chatId: chat.id,
+              role: "assistant",
+              content: aiFullResponse,
+            },
+          });
+        } catch (error) {
+          console.error("Gemini Stream Error:", error);
+
+          controller.error(error);
         }
       },
     });
@@ -72,16 +176,19 @@ export async function POST(req: Request) {
     return new Response(stream, {
       headers: {
         "Content-Type": "text/plain; charset=utf-8",
-        "Cache-Control": "no-cache", // Pastikan stream tidak tersendat oleh cache
+        "Cache-Control": "no-cache",
+        "X-Chat-ID": chat.id,
       },
     });
-  } catch (error: unknown) {
+  } catch (error) {
     console.error("Global Backend Error:", error);
-    return new Response(
-      JSON.stringify({ error: "Gagal memproses permintaan AI" }),
+
+    return Response.json(
+      {
+        error: "Gagal memproses permintaan",
+      },
       {
         status: 500,
-        headers: { "Content-Type": "application/json" },
       },
     );
   }
