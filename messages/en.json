@@ -1,11 +1,30 @@
 {
+  "Metadata": {
+    "title": "AI Chat Assistant",
+    "description": "An interactive and multi-model AI chatbot.",
+    "signInTitle": "Sign In",
+    "signUpTitle": "Sign Up"
+  },
   "Chat": {
     "title": "Welcome to AI Chat",
     "placeholder": "Type your message here...",
     "loginToSave": "Login to save your chat history"
   },
-  "Metadata": {
-    "title": "AI Chat Assistant",
-    "description": "An interactive and multi-model AI chatbot."
+  "Auth": {
+    "signInTitle": "Welcome back",
+    "signInDesc": "Enter your credentials to access your account",
+    "signUpTitle": "Create an account",
+    "signUpDesc": "Enter your information to get started",
+    "nameLabel": "Full Name",
+    "emailLabel": "Email",
+    "passwordLabel": "Password",
+    "forgotPassword": "Forgot password?",
+    "signInButton": "Sign In",
+    "signUpButton": "Sign Up",
+    "orContinueWith": "Or continue with",
+    "noAccount": "Don't have an account?",
+    "signUpLink": "Sign up",
+    "alreadyHaveAccount": "Already have an account?",
+    "signInLink": "Sign in"
   }
 }

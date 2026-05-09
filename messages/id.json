@@ -1,11 +1,30 @@
 {
+  "Metadata": {
+    "title": "Asisten Chat AI",
+    "description": "Chatbot AI interaktif dengan dukungan banyak model.",
+    "signInTitle": "Masuk",
+    "signUpTitle": "Daftar"
+  },
   "Chat": {
     "title": "Selamat datang di AI Chat",
     "placeholder": "Ketik pesan Anda di sini...",
-    "loginToSave": "Masuk untuk menyimpan riwayat chat"
+    "loginToSave": "Masuk untuk menyimpan riwayat chat Anda"
   },
-  "Metadata": {
-    "title": "Asisten Chat AI",
-    "description": "Chatbot AI interaktif dengan dukungan banyak model."
+  "Auth": {
+    "signInTitle": "Selamat datang kembali",
+    "signInDesc": "Masukkan kredensial Anda untuk mengakses akun",
+    "signUpTitle": "Buat akun",
+    "signUpDesc": "Masukkan informasi Anda untuk memulai",
+    "nameLabel": "Nama Lengkap",
+    "emailLabel": "Email",
+    "passwordLabel": "Kata Sandi",
+    "forgotPassword": "Lupa kata sandi?",
+    "signInButton": "Masuk",
+    "signUpButton": "Daftar",
+    "orContinueWith": "Atau lanjutkan dengan",
+    "noAccount": "Belum punya akun?",
+    "signUpLink": "Daftar",
+    "alreadyHaveAccount": "Sudah punya akun?",
+    "signInLink": "Masuk"
   }
 }

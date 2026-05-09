@@ -1,0 +1,30 @@
+{
+  "Metadata": {
+    "title": "مساعد الدردشة الذكي",
+    "description": "روبوت دردشة تفاعلي متعدد النماذج.",
+    "signInTitle": "تسجيل الدخول",
+    "signUpTitle": "إنشاء حساب"
+  },
+  "Chat": {
+    "title": "مرحباً بك في الدردشة الذكية",
+    "placeholder": "اكتب رسالتك هنا...",
+    "loginToSave": "سجل الدخول لحفظ سجل الدردشة"
+  },
+  "Auth": {
+    "signInTitle": "مرحباً بعودتك",
+    "signInDesc": "أدخل بيانات اعتمادك للوصول إلى حسابك",
+    "signUpTitle": "إنشاء حساب",
+    "signUpDesc": "أدخل معلوماتك للبدء",
+    "nameLabel": "الاسم الكامل",
+    "emailLabel": "البريد الإلكتروني",
+    "passwordLabel": "كلمة المرور",
+    "forgotPassword": "هل نسيت كلمة المرور؟",
+    "signInButton": "تسجيل الدخول",
+    "signUpButton": "إنشاء حساب",
+    "orContinueWith": "أو المتابعة باستخدام",
+    "noAccount": "ليس لديك حساب؟",
+    "signUpLink": "إنشاء حساب",
+    "alreadyHaveAccount": "لديك حساب بالفعل؟",
+    "signInLink": "تسجيل الدخول"
+  }
+}
